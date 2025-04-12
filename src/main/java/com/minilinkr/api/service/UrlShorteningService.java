@@ -62,6 +62,20 @@ public class UrlShorteningService {
         return repository.findByShortUrl(shortUrl);
     }
 
+    /**
+     * Deletes a URL mapping by its custom alias.
+     *
+     * @param shortUrl the custom alias for the shortened URL
+     */
+    public void deleteUrlMapping(String shortUrl) {
+        Optional<UrlMapping> mappingOpt = repository.findByShortUrl(shortUrl);
+        if (mappingOpt.isPresent()) {
+            repository.delete(mappingOpt.get());
+        } else {
+            throw new IllegalArgumentException("Alias not found");
+        }
+    }
+
 }
 
 // NOTE: @Service annotation is used to mark this class as a service component in the Spring context. It indicates that this class is a service layer component, which typically contains business logic and interacts with the data access layer (repositories). The @Service annotation is a specialization of the @Component annotation, allowing for better organization and clarity in the application structure. It also enables Spring to automatically detect and register this class as a bean in the application context during component scanning. This allows for dependency injection and other Spring features to be applied to this class.

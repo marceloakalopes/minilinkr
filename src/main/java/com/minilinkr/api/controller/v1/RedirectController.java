@@ -28,6 +28,17 @@ public class RedirectController {
         this.service = service;
     }
 
+    /**
+     * GET endpoint to redirect to the original URL based on the custom alias.
+     *
+     * Example usage:
+     * GET https://linnkr.co/api/v1/urls/{shortUrl}
+     *
+     * @param shortUrl The custom alias for the shortened URL.
+     * @param response The HttpServletResponse object used to send the redirect.
+     * @return A 302 redirect response if the alias is found, or a 404 error if not found.
+     * @throws IOException If an I/O error occurs during redirection.
+     */
     @Operation(
             summary = "Redirect to the original URL",
             description = "Redirects the client to the original URL based on the provided custom alias."
