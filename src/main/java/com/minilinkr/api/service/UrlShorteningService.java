@@ -4,6 +4,7 @@ import com.minilinkr.api.model.UrlMapping;
 import com.minilinkr.api.repository.UrlMappingRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -74,6 +75,15 @@ public class UrlShorteningService {
         } else {
             throw new IllegalArgumentException("Alias not found");
         }
+    }
+
+    /**
+     * Retrieves all URL mappings.
+     *
+     * @return a list of all UrlMapping objects
+     */
+    public List<UrlMapping> getAllUrlMappings() {
+        return repository.findAll();
     }
 
 }

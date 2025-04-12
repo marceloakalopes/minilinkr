@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * Controller class that handles all operations for URL mappings.
  * The base path `/v1/urls` is used for both creating shortened URLs and redirecting.
  */
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v1/urls")
 public class UrlController {
@@ -82,5 +83,23 @@ public class UrlController {
             // In case the alias does not exist or any other business rule violation occurs.
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
+    }
+
+    /**
+     * GET endpoint to retrieve all URL mappings.
+     *
+     * Example usage:
+     * GET https://linnkr.co/api/v1/urls
+     *
+     * @return A list of all URL mappings.
+     */
+    @Operation(
+            summary = "Get all URL mappings",
+            description = "Retrieves all URL mappings in the system."
+    )
+    @ApiResponse(responseCode = "200", description = "List of all URL mappings")
+    @GetMapping
+    public ResponseEntity<?> getAllUrlMappings() {
+        return ResponseEntity.ok(service.getAllUrlMappings());
     }
 }
