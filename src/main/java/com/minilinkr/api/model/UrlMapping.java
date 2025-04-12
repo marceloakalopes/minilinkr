@@ -14,7 +14,7 @@ public class UrlMapping {
     @Column(nullable = false)
     private String originalUrl;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String shortUrl;
 
     private LocalTime createdAt;
