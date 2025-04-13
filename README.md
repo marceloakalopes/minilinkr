@@ -60,5 +60,5 @@ Before running the application, you will need:
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/mini-linkr-api.git
-   cd mini-linkr-api
+   git clone https://github.com/marceloakalopes/minilinkr.git
+   cd minilinkr
