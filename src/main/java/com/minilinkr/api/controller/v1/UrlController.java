@@ -42,6 +42,8 @@ import java.util.*;
 @Tag(name = "URL Mappings", description = "Operations on URL mappings")
 public class UrlController {
 
+    private final List<String> forbiddenAliases = List.of("docs", "api", "v1", "v2", "v3", "admin", "login", "register");
+
     private final UrlShorteningService service;
 
     public UrlController(UrlShorteningService service) {
@@ -135,8 +137,8 @@ public class UrlController {
     @PostMapping
     public void createAlias( @Valid @RequestBody UrlMapping mapping) {
         try {
-            System.out.println("Alias: " + mapping.getAlias());
-            System.out.println("Original URL: " + mapping.getOriginalUrl());
+//            System.out.println("Alias: " + mapping.getAlias());
+//            System.out.println("Original URL: " + mapping.getOriginalUrl());
             service.createCustomAlias(mapping);
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Alias already exists");
@@ -171,6 +173,13 @@ public class UrlController {
     })
     @DeleteMapping("/{alias}")
     public ResponseEntity<ApiSuccessResponse> deleteUrlMapping(@PathVariable String alias) {
+
+
+        // Check if the alias is forbidden
+        if (forbiddenAliases.contains(alias)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to use or delete this alias");
+        }
+
         try {
             service.deleteUrlMapping(alias);
             Map<String,Object> meta = Map.of(
