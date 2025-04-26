@@ -25,51 +25,41 @@ public class UrlShorteningService {
     /**
      * Creates a new URL mapping with a custom alias.
      *
-     * @param originalUrl the original URL to be shortened
-     * @param customAlias the custom alias for the shortened URL
-     * @return the created UrlMapping object
+     * @param urlMapping the UrlMapping object containing the original URL and custom alias
      * @throws IllegalArgumentException if the alias is empty or already exists
      */
-    public UrlMapping createCustomAlias(String originalUrl, String customAlias) {
+    public void createCustomAlias(UrlMapping urlMapping) {
         // Check if alias is provided
-        if (customAlias == null || customAlias.trim().isEmpty()) {
-            throw new IllegalArgumentException("Alias must not be empty");
+        if (urlMapping.getAlias() == null || urlMapping.getAlias().isEmpty()) {
+            throw new IllegalArgumentException("Alias can't be empty");
         }
 
-        // Check if the alias is longer than 16 characters
-//        if (customAlias.length() > 16) {
-//            throw new IllegalArgumentException("Alias can't be longer than 16 characters");
-//        }
-
         // Check if the alias already exists in the database
-        Optional<UrlMapping> existing = repository.findByShortUrl(customAlias);
-        if (existing.isPresent()) {
+        if (repository.findByAlias(urlMapping.getAlias()).isPresent()) {
             throw new IllegalArgumentException("Alias already exists");
         }
 
-        UrlMapping mapping = new UrlMapping(originalUrl);
-        mapping.setShortUrl(customAlias);
-        return repository.save(mapping);
+        repository.save(urlMapping);
     }
 
 
     /**
      * Gets the original URL for a given short URL.
      *
-     * @param shortUrl the custom alias.
+     * @param alias the custom alias.
      * @return an Optional containing the UrlMapping object if found, or an empty Optional if not found
      */
-    public Optional<UrlMapping> getOriginalUrl(String shortUrl) {
-        return repository.findByShortUrl(shortUrl);
+    public Optional<UrlMapping> getOriginalUrl(String alias) {
+        return repository.findByAlias(alias);
     }
 
     /**
      * Deletes a URL mapping by its custom alias.
      *
-     * @param shortUrl the custom alias for the shortened URL
+     * @param alias the custom alias for the shortened URL
      */
-    public void deleteUrlMapping(String shortUrl) {
-        Optional<UrlMapping> mappingOpt = repository.findByShortUrl(shortUrl);
+    public void deleteUrlMapping(String alias) {
+        Optional<UrlMapping> mappingOpt = repository.findByAlias(alias);
         if (mappingOpt.isPresent()) {
             repository.delete(mappingOpt.get());
         } else {

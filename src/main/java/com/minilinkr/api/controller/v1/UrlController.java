@@ -1,22 +1,45 @@
 package com.minilinkr.api.controller.v1;
 
+import com.minilinkr.api.model.ApiSuccessResponse;
 import com.minilinkr.api.model.UrlMapping;
 import com.minilinkr.api.service.UrlShorteningService;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.*;
 
-/**
- * Controller class that handles all operations for URL mappings.
- * The base path `/v1/urls` is used for both creating shortened URLs and redirecting.
- */
-@CrossOrigin(origins = "*")
+@OpenAPIDefinition(
+        info = @Info(
+                title = "MiniLinkr URL Shortener API",
+                version = "1.0",
+                description = "Manage and resolve custom URL aliases.",
+                contact = @Contact(
+                        name = "Marcelo Lopes",
+                        url = "https://github.com/marceloakalopes"
+                )
+        )
+)
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v1/urls")
+@Tag(name = "URL Mappings", description = "Operations on URL mappings")
 public class UrlController {
 
     private final UrlShorteningService service;
@@ -25,81 +48,139 @@ public class UrlController {
         this.service = service;
     }
 
-    /**
-     * POST endpoint to create a new URL mapping.
-     *
-     * Example usage:
-     * POST https://linnkr.co/api/v1/urls?longUrl=http://example.com&alias=customAlias
-     *
-     * @param longUrl The original URL to be shortened.
-     * @param alias   The custom alias for the shortened URL.
-     * @return The created UrlMapping in case of success or a conflict error if the alias already exists.
-     */
     @Operation(
-            summary = "Shorten a URL with a custom alias",
-            description = "Creates a URL mapping that associates the provided long URL with the custom alias. " +
-                    "If the alias is already in use, an error is returned."
+            summary = "List all URL mappings",
+            description = "Retrieve every URL mapping currently stored",
+            tags = { "find" }
     )
-    @ApiResponse(responseCode = "200", description = "URL shortened successfully")
-    @ApiResponse(responseCode = "409", description = "Alias already exists")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "A JSON array of URLMapping objects",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(
+                                    schema = @Schema(implementation = UrlMapping.class)
+                            )
+                    )
+            )
+    })
+    @GetMapping
+    public ResponseEntity<List<UrlMapping>> getAll() {
+        return ResponseEntity.ok(service.getAllUrlMappings());
+    }
+
+    @Operation(
+            summary = "Get a URL mapping by alias",
+            description = "Look up the original URL for a given short alias",
+            tags = { "find" }
+    )
+    @Parameter(
+            name = "alias",
+            description = "The custom alias used in the short URL",
+            required = true,
+            in = ParameterIn.PATH,
+            example = "docs"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "URL mapping found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UrlMapping.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Alias not found"
+            )
+    })
+    @GetMapping("/{alias}")
+    public ResponseEntity<UrlMapping> findByAlias(@PathVariable String alias) {
+        return service.getOriginalUrl(alias)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Alias not found"));
+    }
+
+    @Operation(
+            summary = "Create a new URL mapping",
+            description = "Submit an original URL and a desired alias to create a short link",
+            tags = { "create" }
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Payload containing the original URL and desired alias",
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UrlMapping.class),
+                    examples = @ExampleObject(
+                            name = "CreateExample",
+                            summary = "Create a short link for `https://example.com`",
+                            value = "{ \"originalUrl\": \"https://example.com\", \"alias\": \"exmpl\" }"
+                    )
+            )
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "URL mapping successfully created"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Alias already in use"
+            )
+    })
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<?> createUrlMapping(
-            @Parameter(description = "The original URL to be shortened", required = true)
-            @RequestParam("longUrl") String longUrl,
-            @Parameter(description = "The custom alias for the shortened URL", required = true)
-            @RequestParam("alias") String alias) {
+    public void createAlias( @Valid @RequestBody UrlMapping mapping) {
         try {
-            UrlMapping mapping = service.createCustomAlias(longUrl, alias);
-            return ResponseEntity.ok(mapping);
-        } catch (IllegalAccessError ex) {
-            // In case the alias exists or any other business rule violation occurs.
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+            System.out.println("Alias: " + mapping.getAlias());
+            System.out.println("Original URL: " + mapping.getOriginalUrl());
+            service.createCustomAlias(mapping);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Alias already exists");
         }
     }
 
-    /**
-     * DELETE endpoint to delete a URL mapping.
-     *
-     * Example usage:
-     * DELETE https://linnkr.co/api/v1/urls/customAlias
-     *
-     * @param alias The custom alias for the shortened URL.
-     * @return A success message if the mapping is deleted, or a not found error if the alias does not exist.
-     */
     @Operation(
             summary = "Delete a URL mapping",
-            description = "Deletes the URL mapping associated with the provided custom alias."
+            description = "Remove an existing URL alias",
+            tags = { "delete" }
     )
-    @ApiResponse(responseCode = "200", description = "URL mapping deleted successfully")
-    @ApiResponse(responseCode = "404", description = "Alias not found")
+    @Parameter(
+            name = "alias",
+            description = "The custom alias to delete",
+            required = true,
+            in = ParameterIn.PATH,
+            example = "exmpl"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Deletion successful",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiSuccessResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Alias not found"
+            )
+    })
     @DeleteMapping("/{alias}")
-    public ResponseEntity<?> deleteUrlMapping(
-            @Parameter(description = "The custom alias for the shortened URL", required = true)
-            @PathVariable("alias") String alias) {
+    public ResponseEntity<ApiSuccessResponse> deleteUrlMapping(@PathVariable String alias) {
         try {
             service.deleteUrlMapping(alias);
-            return ResponseEntity.ok("URL mapping deleted successfully");
-        } catch (IllegalAccessError ex) {
-            // In case the alias does not exist or any other business rule violation occurs.
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            Map<String,Object> meta = Map.of(
+                    "messages",
+                    Collections.singletonList("[INFO] The alias was deleted successfully. Learn more: https://docs.minilinkr.com"),
+                    "deleted_alias", alias
+            );
+            return ResponseEntity.ok(new ApiSuccessResponse(true, "deleted", meta));
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Alias not found");
         }
-    }
-
-    /**
-     * GET endpoint to retrieve all URL mappings.
-     *
-     * Example usage:
-     * GET https://linnkr.co/api/v1/urls
-     *
-     * @return A list of all URL mappings.
-     */
-    @Operation(
-            summary = "Get all URL mappings",
-            description = "Retrieves all URL mappings in the system."
-    )
-    @ApiResponse(responseCode = "200", description = "List of all URL mappings")
-    @GetMapping
-    public ResponseEntity<?> getAllUrlMappings() {
-        return ResponseEntity.ok(service.getAllUrlMappings());
     }
 }
