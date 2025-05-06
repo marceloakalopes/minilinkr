@@ -21,10 +21,24 @@ import java.util.Optional;
 @RestController
 public class RedirectController {
 
+    private final String DEFAULT_REDIRECT_URL = "https://minilinkr.com";
+
     private final UrlShorteningService service;
 
     public RedirectController(UrlShorteningService service) {
         this.service = service;
+    }
+
+    @Tag(name = "redirect")
+    @Operation(
+            summary = "Redirect to the default URL",
+            description = "Redirects the client to the default URL."
+    )
+    @ApiResponse(responseCode = "302", description = "Redirection successful")
+    @GetMapping
+    public ResponseEntity<Void> redirectToDefault(HttpServletResponse response) throws IOException {
+        response.sendRedirect(DEFAULT_REDIRECT_URL);
+        return null;
     }
 
     @Tag(name = "redirect")
