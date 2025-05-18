@@ -1,4 +1,4 @@
-<div style="display: flex; flex-direction: row; justify-content: center; gap: 12px; align-items: center; margin-top: 20px; margin-bottom: 20px;">
+<div align="center">
     <img height="36" src="https://raw.githubusercontent.com/marceloakalopes/minilinkr/refs/heads/main/images/logo.png" alt="MiniLinkr Logo" />
 </div>
 
