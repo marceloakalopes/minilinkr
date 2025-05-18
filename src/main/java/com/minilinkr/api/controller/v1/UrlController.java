@@ -25,6 +25,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
+/**
+ * Controller for managing URL mappings.
+ * Provides endpoints to create, retrieve, and delete URL mappings.
+ */
 @OpenAPIDefinition(
         info = @Info(
                 title = "MiniLinkr URL Shortener API",
@@ -42,14 +46,30 @@ import java.util.*;
 @Tag(name = "URL Mappings", description = "Operations on URL mappings")
 public class UrlController {
 
+    /**
+     * List of forbidden aliases that cannot be used for URL mappings.
+     */
     private final List<String> forbiddenAliases = List.of("docs", "api", "v1", "v2", "v3", "admin", "login", "register");
 
+    /**
+     * The URL shortening service used to manage URL mappings.
+     */
     private final UrlShorteningService service;
 
+    /**
+     * Constructor for UrlController.
+     *
+     * @param service The URL shortening service to be used.
+     */
     public UrlController(UrlShorteningService service) {
         this.service = service;
     }
 
+    /**
+     * Retrieves all URL mappings.
+     *
+     * @return A list of all URL mappings.
+     */
     @Operation(
             summary = "List all URL mappings",
             description = "Retrieve every URL mapping currently stored",
@@ -72,6 +92,12 @@ public class UrlController {
         return ResponseEntity.ok(service.getAllUrlMappings());
     }
 
+    /**
+     * Retrieves a URL mapping by its alias.
+     *
+     * @param alias The custom alias used in the short URL.
+     * @return The URL mapping associated with the given alias.
+     */
     @Operation(
             summary = "Get a URL mapping by alias",
             description = "Look up the original URL for a given short alias",
@@ -105,6 +131,11 @@ public class UrlController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Alias not found"));
     }
 
+    /**
+     * Creates a new URL mapping with a custom alias.
+     *
+     * @param mapping The URL mapping to be created.
+     */
     @Operation(
             summary = "Create a new URL mapping",
             description = "Submit an original URL and a desired alias to create a short link",
@@ -145,6 +176,12 @@ public class UrlController {
         }
     }
 
+    /**
+     * Deletes a URL mapping by its alias.
+     *
+     * @param alias The custom alias used in the short URL.
+     * @return A success response indicating the deletion was successful.
+     */
     @Operation(
             summary = "Delete a URL mapping",
             description = "Remove an existing URL alias",

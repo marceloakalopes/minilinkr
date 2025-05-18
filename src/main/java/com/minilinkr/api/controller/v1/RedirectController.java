@@ -29,19 +29,31 @@ public class RedirectController {
         this.service = service;
     }
 
-    @Tag(name = "redirect")
+    /**
+     * Redirects the client to the default URL.
+     *
+     * @param response the HTTP response
+     * @throws IOException if an I/O error occurs
+     */
     @Operation(
             summary = "Redirect to the default URL",
             description = "Redirects the client to the default URL."
     )
     @ApiResponse(responseCode = "302", description = "Redirection successful")
     @GetMapping
+    @Tag(name = "redirect")
     public ResponseEntity<Void> redirectToDefault(HttpServletResponse response) throws IOException {
         response.sendRedirect(DEFAULT_REDIRECT_URL);
         return null;
     }
 
-    @Tag(name = "redirect")
+    /**
+     * Redirects the client to the original URL based on the provided custom alias.
+     *
+     * @param alias   the custom alias for the shortened URL
+     * @param response the HTTP response
+     * @throws IOException if an I/O error occurs
+     */
     @Operation(
             summary = "Redirect to the original URL",
             description = "Redirects the client to the original URL based on the provided custom alias."
@@ -49,6 +61,7 @@ public class RedirectController {
     @ApiResponse(responseCode = "302", description = "Redirection successful")
     @ApiResponse(responseCode = "404", description = "Alias not found")
     @GetMapping("/{alias}")
+    @Tag(name = "redirect")
     public ResponseEntity<Void> redirect (
             @Parameter(description = "The custom alias for the shortened URL.", required = true)
             @PathVariable String alias,
