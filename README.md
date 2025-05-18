@@ -1,5 +1,5 @@
 <div style="display: flex; flex-direction: row; justify-content: center; gap: 12px; align-items: center; margin-top: 20px; margin-bottom: 20px;">
-    <img height="36" src="/images/logo.png" alt="MiniLinkr Logo" />
+    <img height="36" src="https://raw.githubusercontent.com/marceloakalopes/minilinkr/refs/heads/main/images/logo.png" alt="MiniLinkr Logo" />
 </div>
 
 <p align="center">
@@ -16,12 +16,10 @@ MiniLinkr is a lightning-fast URL shortener API built with Spring Boot. It allow
 * [Features](#features)
 * [Tech Stack](#tech-stack)
 * [Getting Started](#getting-started)
-
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
   * [Configuration](#configuration)
 * [Running the Application](#running-the-application)
-
   * [With Maven](#with-maven)
   * [As Executable JAR](#as-executable-jar)
   * [Using Docker](#using-docker)
