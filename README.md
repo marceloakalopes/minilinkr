@@ -7,7 +7,9 @@
 </p>
 
 
-![MiniLinkr Sample](/images/sample.png)
+<div align="center">
+  <img src="https://raw.githubusercontent.com/marceloakalopes/minilinkr/refs/heads/main/images/sample.png" alt="MiniLinkr Sample" />
+</div>
 
 MiniLinkr is a lightning-fast URL shortener API built with Spring Boot. It allows you to create custom short URLs with user-defined aliases (or generate random ones), manage mappings, and seamlessly redirect users to original URLs. Out-of-the-box support for OpenAPI documentation and Docker makes it production-ready.
 
